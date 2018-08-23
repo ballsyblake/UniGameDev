@@ -17,7 +17,7 @@ public class TempDisable : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-		Debug.Log(currentTime);
+		
 		if(imageExist.enabled == false)
 		{
 			currentTime += Time.deltaTime;
