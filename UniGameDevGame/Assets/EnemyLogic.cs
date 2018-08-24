@@ -11,39 +11,65 @@ public class EnemyLogic : MonoBehaviour {
 	private Animator anim;
 	private Rigidbody2D rb;
 	private bool right;
+	private bool dead = false;
+	public GameObject deathFlamePrefab;
+
+	public float health = 100;
+	public float mana = 100;
+	
 
 	// Use this for initialization
 	void Start () {
+
 		target = GameObject.FindGameObjectWithTag("Player");
 		home = GameObject.Find("BlackKnightHome").transform.position;
 		anim = GetComponent<Animator>();
 		rb = GetComponent<Rigidbody2D>();
+
 	}
 	
 	// Update is called once per frame
 	void Update () {
+		if (dead == false)
+		{
+			//This is the code for the movement and attack functionality of the skeleton
+			#region
+			if (anim.GetCurrentAnimatorStateInfo(0).IsName("skill_1") || anim.GetCurrentAnimatorStateInfo(0).IsName("skill_2"))
+				speed = 0f;
+			else
+				speed = 2f;
+			distance = Vector2.Distance(target.transform.position, transform.position);
 
-		distance = Vector2.Distance(target.transform.position, transform.position);
+			if (distance <= 6f)
+				Melee();
+			else if (distance > 6f && distance < 13f && mana >= 60)
+				Ranged();
 
-		if (distance < 4f)
-			Melee();
+			if (target.transform.position.x > transform.position.x)
+				right = true;
+			else
+				right = false;
 
-		if (target.transform.position.x > transform.position.x)
-			right = true;
-		else
-			right = false;
-
-		if (distance < 15f)
-			Attack();
-		else if (Vector2.Distance(transform.position, home) >= 2f)
-			ReturnHome();
-		else
-			anim.SetBool("Walking", false);
-		
+			if (distance < 15f)
+				Attack();
+			else if (Vector2.Distance(transform.position, home) >= 2f)
+				ReturnHome();
+			else
+				anim.SetBool("Walking", false);
+			#endregion
+			Debug.Log(mana);
+			mana = Mathf.MoveTowards(mana, 100, 5 * Time.deltaTime);
+			if (health <= 0f)
+			{ 
+				dead = true;
+				Death();
+			}
+		}
 	}
 
 	void Attack()
 	{
+		
 		anim.SetBool("Walking", true);
 		Flip(new Vector2(target.transform.position.x, target.transform.position.y));
 		transform.position = Vector2.MoveTowards(transform.position, target.transform.position, speed * Time.deltaTime);
@@ -51,6 +77,7 @@ public class EnemyLogic : MonoBehaviour {
 
 	void ReturnHome()
 	{
+		
 		anim.SetBool("Walking", true);
 		Flip(home);
 		transform.position = Vector2.MoveTowards(transform.position,home,speed*Time.deltaTime);
@@ -58,16 +85,19 @@ public class EnemyLogic : MonoBehaviour {
 
 	void Flip(Vector2 target)
 	{
-		Vector3 theScale = transform.localScale;
-		if (target.x < transform.position.x)
+		if(!anim.GetCurrentAnimatorStateInfo(0).IsName("skill_1") && !anim.GetCurrentAnimatorStateInfo(0).IsName("skill_2"))
 		{
-			theScale.x = -0.01f;
-			transform.localScale = theScale;
-		}
-		else if (target.x > transform.position.x)
-		{
-			theScale.x = 0.01f;
-			transform.localScale = theScale;
+			Vector3 theScale = transform.localScale;
+			if (target.x < transform.position.x)
+			{
+				theScale.x = -0.01f;
+				transform.localScale = theScale;
+			}
+			else if (target.x > transform.position.x)
+			{
+				theScale.x = 0.01f;
+				transform.localScale = theScale;
+			}
 		}
 	}
 
@@ -79,5 +109,21 @@ public class EnemyLogic : MonoBehaviour {
 	void Ranged()
 	{
 		anim.SetTrigger("Magic");
+		if (anim.GetCurrentAnimatorStateInfo(0).IsName("skill_2"))
+			mana -= 60;
+	}
+
+	void Death()
+	{
+		anim.SetTrigger("death");
+		Destroy(gameObject, this.GetComponent<Animator>().GetCurrentAnimatorStateInfo(0).length);
+		GetComponent<Rigidbody2D>().simulated = false;
+		GetComponent<BoxCollider2D>().enabled = false;
+	}
+
+	private void OnDestroy()
+	{
+		GameObject deathFlame = Instantiate(deathFlamePrefab, transform.position, transform.rotation);
+		Destroy(deathFlame, deathFlame.GetComponentInChildren<Animator>().GetCurrentAnimatorStateInfo(0).length);
 	}
 }
