@@ -10,12 +10,12 @@ public class EnemyLogic : MonoBehaviour {
 	public float speed = 5f;
 	private Animator anim;
 	private Rigidbody2D rb;
-	private bool right;
 	private bool dead = false;
 	public GameObject deathFlamePrefab;
 
-	public float health = 100;
-	public float mana = 100;
+	public float health = 100f;
+	public float mana = 100f;
+	private float BaseDamage = 10f;
 	
 
 	// Use this for initialization
@@ -39,16 +39,14 @@ public class EnemyLogic : MonoBehaviour {
 			else
 				speed = 2f;
 			distance = Vector2.Distance(target.transform.position, transform.position);
+			Debug.Log(distance);
 
 			if (distance <= 6f)
 				Melee();
 			else if (distance > 6f && distance < 13f && mana >= 60)
 				Ranged();
 
-			if (target.transform.position.x > transform.position.x)
-				right = true;
-			else
-				right = false;
+			
 
 			if (distance < 15f)
 				Attack();
@@ -57,7 +55,7 @@ public class EnemyLogic : MonoBehaviour {
 			else
 				anim.SetBool("Walking", false);
 			#endregion
-			Debug.Log(mana);
+			
 			mana = Mathf.MoveTowards(mana, 100, 5 * Time.deltaTime);
 			if (health <= 0f)
 			{ 
@@ -69,7 +67,8 @@ public class EnemyLogic : MonoBehaviour {
 
 	void Attack()
 	{
-		
+		if (distance <= 3.5f)
+			target.GetComponent<PlatformerCharacter2D>().TakeDamage(BaseDamage);
 		anim.SetBool("Walking", true);
 		Flip(new Vector2(target.transform.position.x, target.transform.position.y));
 		transform.position = Vector2.MoveTowards(transform.position, target.transform.position, speed * Time.deltaTime);
@@ -125,5 +124,16 @@ public class EnemyLogic : MonoBehaviour {
 	{
 		GameObject deathFlame = Instantiate(deathFlamePrefab, transform.position, transform.rotation);
 		Destroy(deathFlame, deathFlame.GetComponentInChildren<Animator>().GetCurrentAnimatorStateInfo(0).length);
+	}
+
+	public void TakeDamage(float damage)
+	{
+		Debug.Log("Received damage");
+		health -= damage;
+		Vector2 dir = transform.position - target.transform.position;
+		float force = 50000f;
+
+		dir.Normalize();
+		GetComponent<Rigidbody2D>().AddForce(dir * force);
 	}
 }
