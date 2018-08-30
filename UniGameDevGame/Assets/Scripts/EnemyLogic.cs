@@ -6,7 +6,7 @@ using UnityEditor;
 public class EnemyLogic : MonoBehaviour {
 
 	private GameObject target;
-	private float distance = 0f;
+	public float distance = 0f;
 	private Vector2 home;
 	public float speed = 5f;
 	private Animator anim;
@@ -32,7 +32,8 @@ public class EnemyLogic : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-		if (dead == false)
+		
+		if (dead == false && target)
 		{
 			//This is the code for the movement and attack functionality of the skeleton
 			#region
@@ -50,9 +51,9 @@ public class EnemyLogic : MonoBehaviour {
 
 			
 
-			if (distance < 15f)
+			if (distance < 15f && distance > 2f)
 				Attack();
-			else if (Vector2.Distance(transform.position, home) >= 2f)
+			else if (Vector2.Distance(transform.position, home) >= 2f && distance > 15f)
 				ReturnHome();
 			else
 				anim.SetBool("Walking", false);
@@ -148,7 +149,7 @@ public class EnemyLogic : MonoBehaviour {
 	{
 		Quaternion rotation = transform.rotation;
 		rotation.eulerAngles = new Vector3(transform.rotation.x, transform.rotation.y, 90f);
-		Debug.Log(rotation);
+		//Debug.Log(rotation);
 		GameObject magicCircle = Instantiate(MagicCirclePrefab, target.transform.GetChild(0).transform.position, rotation);
 		Destroy(magicCircle, magicCircle.GetComponent<Animator>().GetCurrentAnimatorStateInfo(0).length);
 	}

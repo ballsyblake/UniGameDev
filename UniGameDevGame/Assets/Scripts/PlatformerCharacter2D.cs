@@ -27,6 +27,8 @@ public class PlatformerCharacter2D : MonoBehaviour
 	public EnemyLogic EnemyHealth;
 	public float PlayerHealth = 100f;
 	private bool already = false;
+	public float distance = 0f;
+	private GameObject Enemy;
 	
 		
 
@@ -37,12 +39,19 @@ public class PlatformerCharacter2D : MonoBehaviour
         m_CeilingCheck = transform.Find("CeilingCheck");
         m_Anim = GetComponent<Animator>();
         m_Rigidbody2D = GetComponent<Rigidbody2D>();
+
 			
     }
 
+	private void Start()
+	{
+		Enemy = GameObject.Find("black_knight");
+	}
 
-    private void FixedUpdate()
+
+	private void FixedUpdate()
     {
+		distance = GameObject.Find("black_knight").GetComponent<EnemyLogic>().distance;
         m_Grounded = false;
 
         // The player is grounded if a circlecast to the groundcheck position hits anything designated as ground
@@ -171,11 +180,20 @@ public class PlatformerCharacter2D : MonoBehaviour
 	public void TakeDamage(float damage)
 	{
 		PlayerHealth -= damage;
+		
+		Vector2 dir = new Vector2(5f,0.1f);
+		float force = 5000f;
+		if((Enemy.transform.position.x - transform.position.x) > 0)
+			GetComponent<Rigidbody2D>().AddForce(-dir * force);
+		else if((Enemy.transform.position.x - transform.position.x) < 0)
+			GetComponent<Rigidbody2D>().AddForce(dir * force);
+		gameObject.GetComponent<Rigidbody2D>().velocity = Vector2.ClampMagnitude(GetComponent<Rigidbody2D>().velocity, force);
 	}
 
 	void Death()
 	{
-		//Destroy(gameObject);
+		//Debug.Log("ran");
+		Destroy(gameObject);
 		SceneManager.LoadScene("End", LoadSceneMode.Single);
 	}
 }
