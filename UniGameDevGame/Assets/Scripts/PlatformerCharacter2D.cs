@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 
 public class PlatformerCharacter2D : MonoBehaviour
@@ -25,6 +26,8 @@ public class PlatformerCharacter2D : MonoBehaviour
 	public float BaseDamage = 10f;
 	public EnemyLogic EnemyHealth;
 	public float PlayerHealth = 100f;
+	private bool already = false;
+	
 		
 
     private void Awake()
@@ -54,6 +57,9 @@ public class PlatformerCharacter2D : MonoBehaviour
 
         // Set the vertical animation
         m_Anim.SetFloat("vSpeed", m_Rigidbody2D.velocity.y);
+
+		if (PlayerHealth <= 0f)
+			Death();
     }
 
 
@@ -110,23 +116,45 @@ public class PlatformerCharacter2D : MonoBehaviour
 	public void Attack()
 	{
 		
-		m_Anim.SetTrigger("Attack");
-		if(EnemyInside)
+		//Debug.Log("Ran");
+		if (EnemyInside && already == true)
 		{
-			Debug.Log("Send attack");
+			//Debug.Log("Send attack");
 			EnemyHealth.TakeDamage(BaseDamage);
+			
 		}
+		else if(already == false)
+		{
+			m_Anim.SetTrigger("Attack");
+			already = true;
+		}
+			
+		
+	}
+
+	public void SetBool()
+	{
+		already = false;
 	}
 
 	public void OnTriggerStay2D(Collider2D collision)
 	{
+		
 		if (collision.tag == "Enemy")
 		{
+			//Debug.Log("Collider");
 			EnemyInside = true;
 			EnemyHealth = collision.GetComponent<EnemyLogic>();
 		}
-		else
+		
+	}
+
+	public void OnTriggerExit2D(Collider2D collision)
+	{
+		if(collision.tag == "Enemy")
+		{
 			EnemyInside = false;
+		}
 	}
 
 	private void Flip()
@@ -142,7 +170,13 @@ public class PlatformerCharacter2D : MonoBehaviour
 
 	public void TakeDamage(float damage)
 	{
+		PlayerHealth -= damage;
+	}
 
+	void Death()
+	{
+		//Destroy(gameObject);
+		SceneManager.LoadScene("End", LoadSceneMode.Single);
 	}
 }
 

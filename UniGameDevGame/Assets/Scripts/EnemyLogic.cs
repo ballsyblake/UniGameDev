@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEditor;
 
 public class EnemyLogic : MonoBehaviour {
 
@@ -39,7 +40,7 @@ public class EnemyLogic : MonoBehaviour {
 			else
 				speed = 2f;
 			distance = Vector2.Distance(target.transform.position, transform.position);
-			Debug.Log(distance);
+			//Debug.Log(distance);
 
 			if (distance <= 6f)
 				Melee();
@@ -67,8 +68,6 @@ public class EnemyLogic : MonoBehaviour {
 
 	void Attack()
 	{
-		if (distance <= 3.5f)
-			target.GetComponent<PlatformerCharacter2D>().TakeDamage(BaseDamage);
 		anim.SetBool("Walking", true);
 		Flip(new Vector2(target.transform.position.x, target.transform.position.y));
 		transform.position = Vector2.MoveTowards(transform.position, target.transform.position, speed * Time.deltaTime);
@@ -100,6 +99,12 @@ public class EnemyLogic : MonoBehaviour {
 		}
 	}
 
+	public void SendDamage()
+	{
+		if (distance <= 3.5f)
+			target.GetComponent<PlatformerCharacter2D>().TakeDamage(BaseDamage);
+	}
+
 	void Melee()
 	{
 		anim.SetTrigger("Attack");
@@ -115,12 +120,13 @@ public class EnemyLogic : MonoBehaviour {
 	void Death()
 	{
 		anim.SetTrigger("death");
+		
 		Destroy(gameObject, this.GetComponent<Animator>().GetCurrentAnimatorStateInfo(0).length);
 		GetComponent<Rigidbody2D>().simulated = false;
 		GetComponent<BoxCollider2D>().enabled = false;
 	}
 
-	private void OnDestroy()
+	void DeathFlame()
 	{
 		GameObject deathFlame = Instantiate(deathFlamePrefab, transform.position, transform.rotation);
 		Destroy(deathFlame, deathFlame.GetComponentInChildren<Animator>().GetCurrentAnimatorStateInfo(0).length);
