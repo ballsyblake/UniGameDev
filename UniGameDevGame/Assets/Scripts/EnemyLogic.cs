@@ -13,6 +13,7 @@ public class EnemyLogic : MonoBehaviour {
 	private Rigidbody2D rb;
 	private bool dead = false;
 	public GameObject deathFlamePrefab;
+	public GameObject MagicCirclePrefab;
 
 	public float health = 100f;
 	public float mana = 100f;
@@ -137,9 +138,18 @@ public class EnemyLogic : MonoBehaviour {
 		Debug.Log("Received damage");
 		health -= damage;
 		Vector2 dir = transform.position - target.transform.position;
-		float force = 50000f;
+		float force = 40000f;
 
 		dir.Normalize();
 		GetComponent<Rigidbody2D>().AddForce(dir * force);
+	}
+
+	public void SpawnMagic()
+	{
+		Quaternion rotation = transform.rotation;
+		rotation.eulerAngles = new Vector3(transform.rotation.x, transform.rotation.y, 90f);
+		Debug.Log(rotation);
+		GameObject magicCircle = Instantiate(MagicCirclePrefab, target.transform.GetChild(0).transform.position, rotation);
+		Destroy(magicCircle, magicCircle.GetComponent<Animator>().GetCurrentAnimatorStateInfo(0).length);
 	}
 }
