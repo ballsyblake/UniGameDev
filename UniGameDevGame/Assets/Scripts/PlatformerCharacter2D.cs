@@ -29,8 +29,10 @@ public class PlatformerCharacter2D : MonoBehaviour
 	private bool already = false;
 	public float distance = 0f;
 	private GameObject Enemy;
-	
-		
+    private bool flyBack = false;
+    public GameObject deathFlamePrefab;
+
+
 
     private void Awake()
     {
@@ -53,7 +55,16 @@ public class PlatformerCharacter2D : MonoBehaviour
     {
 		distance = GameObject.Find("black_knight").GetComponent<EnemyLogic>().distance;
         m_Grounded = false;
+        if (flyBack)
+        {
+            Vector2 dir = new Vector2(6f, 0.5f);
+            if ((transform.position.x - Enemy.transform.position.x) < 0)
+                dir.x *= -1;
 
+            Debug.Log(dir);
+            GetComponent<Rigidbody2D>().AddForce(dir, ForceMode2D.Impulse);
+        }
+            
         // The player is grounded if a circlecast to the groundcheck position hits anything designated as ground
         // This can be done using layers instead but Sample Assets will not overwrite your project settings.
         Collider2D[] colliders = Physics2D.OverlapCircleAll(m_GroundCheck.position, k_GroundedRadius, m_WhatIsGround);
@@ -124,9 +135,8 @@ public class PlatformerCharacter2D : MonoBehaviour
 
 	public void Attack()
 	{
-		
-		//Debug.Log("Ran");
-		if (EnemyInside && already == true)
+        //Debug.Log("Ran");
+        if (EnemyInside && already == true)
 		{
 			//Debug.Log("Send attack");
 			EnemyHealth.TakeDamage(BaseDamage);
@@ -180,17 +190,44 @@ public class PlatformerCharacter2D : MonoBehaviour
 	public void TakeDamage(float damage)
 	{
 		PlayerHealth -= damage;
-		
-		Vector2 dir = new Vector2(5f,0.1f);
-		float force = 5000f;
+        StartCoroutine(TakenDam(Enemy.transform));
+        GetComponent<Rigidbody2D>().velocity = new Vector2((transform.position.x - Enemy.transform.position.x) * 25, GetComponent<Rigidbody2D>().velocity.y);
+
+        /*Vector2 dir = new Vector2(10f,0.1f);
+		float force = 500f;
 		if((Enemy.transform.position.x - transform.position.x) > 0)
-			GetComponent<Rigidbody2D>().AddForce(-dir * force);
+        {
+
+            dir.x *= -1;
+            GetComponent<Rigidbody2D>().AddForce(dir * force, ForceMode2D.Impulse);
+        }
+			
 		else if((Enemy.transform.position.x - transform.position.x) < 0)
-			GetComponent<Rigidbody2D>().AddForce(dir * force);
-		gameObject.GetComponent<Rigidbody2D>().velocity = Vector2.ClampMagnitude(GetComponent<Rigidbody2D>().velocity, force);
+        {
+            Debug.Log(dir * force);
+            GetComponent<Rigidbody2D>().AddForce(dir * force, ForceMode2D.Impulse);
+        }*/
+			
+		//gameObject.GetComponent<Rigidbody2D>().velocity = Vector2.ClampMagnitude(GetComponent<Rigidbody2D>().velocity, force);
 	}
 
-	void Death()
+    IEnumerator TakenDam(Transform damageSource)
+    {
+        
+        GetComponent<SpriteRenderer>().color = Color.red;
+        flyBack = true;
+        
+        gameObject.GetComponent<PlatformerCharacter2D>().m_MaxSpeed = 0f;
+        gameObject.GetComponent<Animator>().enabled = false;
+        yield return new WaitForSeconds(0.2f);
+        gameObject.GetComponent<Animator>().enabled = true;
+        gameObject.GetComponent<PlatformerCharacter2D>().m_MaxSpeed = 5f;
+        flyBack = false;
+        GetComponent<SpriteRenderer>().color = Color.white;
+    }
+        
+
+    void Death()
 	{
 		//Debug.Log("ran");
 		Destroy(gameObject);
