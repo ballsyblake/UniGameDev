@@ -7,6 +7,7 @@ public class DialogueManager : MonoBehaviour {
 
     public Text nameText;
     public Text dialogueText;
+    public Button dialogueNextBtn;
 
     public Queue<string> sentences;
 
@@ -17,6 +18,7 @@ public class DialogueManager : MonoBehaviour {
 	
     public void StartDialogue (Dialogue dialogue)
     {
+        dialogueNextBtn.GetComponent<Button>().interactable = true;
         nameText.text = dialogue.name;
 
         sentences.Clear();
@@ -31,6 +33,7 @@ public class DialogueManager : MonoBehaviour {
 
     public void DisplayNextSentence()
     {
+        
         if(sentences.Count == 0)
         {
             EndDialogue();
@@ -43,7 +46,7 @@ public class DialogueManager : MonoBehaviour {
 
     void EndDialogue()
     {
-        //End dialogue here with animation or something similar
+        dialogueNextBtn.GetComponent<Button>().interactable = false;
     }
 	
 }

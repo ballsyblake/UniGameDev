@@ -31,6 +31,8 @@ public class PlatformerCharacter2D : MonoBehaviour
 	private GameObject Enemy;
     private bool flyBack = false;
     public GameObject deathFlamePrefab;
+    public GameObject arrowPrefab;
+    private float arrowSpeed = 10f;
 
 
 
@@ -61,7 +63,7 @@ public class PlatformerCharacter2D : MonoBehaviour
             if ((transform.position.x - Enemy.transform.position.x) < 0)
                 dir.x *= -1;
 
-            Debug.Log(dir);
+            
             GetComponent<Rigidbody2D>().AddForce(dir, ForceMode2D.Impulse);
         }
             
@@ -151,6 +153,20 @@ public class PlatformerCharacter2D : MonoBehaviour
 		
 	}
 
+    public void Arrow()
+    {
+        Quaternion rotation = Quaternion.Euler(transform.rotation.x, transform.rotation.y, -90);
+        if (transform.localScale.x < 0)
+            rotation = Quaternion.Euler(transform.rotation.x, transform.rotation.y, 90);
+        GameObject arrow = Instantiate(arrowPrefab, GameObject.Find("ArrowSpawnPoint").transform.position, rotation);
+        
+        if(transform.localScale.x < 0)
+            arrow.GetComponent<Rigidbody2D>().velocity = new Vector2(-1 * arrowSpeed,0);
+        else
+            arrow.GetComponent<Rigidbody2D>().velocity = new Vector2(1 * arrowSpeed, 0);
+        
+    }
+
 	public void SetBool()
 	{
 		already = false;
@@ -165,6 +181,9 @@ public class PlatformerCharacter2D : MonoBehaviour
 			EnemyInside = true;
 			EnemyHealth = collision.GetComponent<EnemyLogic>();
 		}
+
+        if (collision.tag == "Chest")
+            collision.GetComponent<ChestOpen>().OpenChest();
 		
 	}
 
