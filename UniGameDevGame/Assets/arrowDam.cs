@@ -16,11 +16,13 @@ public class arrowDam : MonoBehaviour {
 
     private void OnCollisionEnter2D(Collision2D collision)
     {
+        Debug.Log("hit something");
         if (collision.collider.tag == "Enemy")
         {
             Debug.Log("Hit");
             collision.collider.GetComponent<EnemyLogic>().TakeDamage(5f);
-            Destroy(this);
+            
         }
+        Destroy(gameObject);
     }
 }
